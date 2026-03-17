@@ -35,6 +35,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
 class Net(nn.Module):
 
+    
     def __init__(self):
         super(Net, self).__init__()
 
@@ -68,6 +69,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Net().to(device)
 
 criterion = nn.CrossEntropyLoss()
+
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 with mlflow.start_run():
@@ -123,7 +125,9 @@ with mlflow.start_run():
 
         accuracy = correct / total
 
-        print(f"Epoch {epoch+1}/{epochs} | Loss: {avg_loss:.4f} | Accuracy: {accuracy:.4f}")
+        print(
+            f"Epoch {epoch+1}/{epochs} | Loss: {avg_loss:.4f} | Accuracy: {accuracy:.4f}"
+        )
 
         mlflow.log_metric("loss", avg_loss, step=epoch)
         mlflow.log_metric("accuracy", accuracy, step=epoch)
