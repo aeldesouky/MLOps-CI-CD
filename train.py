@@ -6,12 +6,18 @@ from torch.utils.data import DataLoader
 import mlflow
 import mlflow.pytorch
 
+learning_rate = 0.01
+batch_size = 64
+epochs = 5
+
 with mlflow.start_run() as run:
     run_id = run.info.run_id
 
-    learning_rate = 0.01
-    batch_size = 64
-    epochs = 5
+    mlflow.log_param("learning_rate", learning_rate)
+    mlflow.log_param("batch_size", batch_size)
+    mlflow.log_param("epochs", epochs)
+
+    mlflow.set_tag("student_id", "202201114")
 
     transform = transforms.Compose([
         transforms.ToTensor()
@@ -71,65 +77,57 @@ with mlflow.start_run() as run:
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    with mlflow.start_run():
+    for epoch in range(epochs):
 
-        mlflow.log_param("learning_rate", learning_rate)
-        mlflow.log_param("batch_size", batch_size)
-        mlflow.log_param("epochs", epochs)
+        model.train()
+        total_loss = 0
 
-        mlflow.set_tag("student_id", "YOUR_ID")
+        for images, labels in train_loader:
 
-        for epoch in range(epochs):
+            images = images.to(device)
+            labels = labels.to(device)
 
-            model.train()
-            total_loss = 0
+            optimizer.zero_grad()
 
-            for images, labels in train_loader:
+            outputs = model(images)
+
+            loss = criterion(outputs, labels)
+
+            loss.backward()
+
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        avg_loss = total_loss / len(train_loader)
+
+        model.eval()
+
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+
+            for images, labels in test_loader:
 
                 images = images.to(device)
                 labels = labels.to(device)
 
-                optimizer.zero_grad()
-
                 outputs = model(images)
 
-                loss = criterion(outputs, labels)
+                _, predicted = torch.max(outputs.data, 1)
 
-                loss.backward()
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
-                optimizer.step()
+        accuracy = correct / total
 
-                total_loss += loss.item()
+        print(f"Epoch {epoch+1}/{epochs} | Loss: {avg_loss:.4f} | Accuracy: {accuracy:.4f}")
 
-            avg_loss = total_loss / len(train_loader)
+        mlflow.log_metric("loss", avg_loss, step=epoch)
+        mlflow.log_metric("accuracy", accuracy, step=epoch)
 
-            model.eval()
-
-            correct = 0
-            total = 0
-
-            with torch.no_grad():
-
-                for images, labels in test_loader:
-
-                    images = images.to(device)
-                    labels = labels.to(device)
-
-                    outputs = model(images)
-
-                    _, predicted = torch.max(outputs.data, 1)
-
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
-
-            accuracy = correct / total
-
-            print(f"Epoch {epoch+1}/{epochs} | Loss: {avg_loss:.4f} | Accuracy: {accuracy:.4f}")
-
-            mlflow.log_metric("loss", avg_loss, step=epoch)
-            mlflow.log_metric("accuracy", accuracy, step=epoch)
-
-        mlflow.pytorch.log_model(model, name="model")
+    mlflow.pytorch.log_model(model, name="model")
 
     print("Training complete")
 
