@@ -27,8 +27,8 @@ jobs:
     #   - name: Pull data with DVC
 
       - name: Train model
-        env:
-          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+        # env:
+        #   MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         run: python train.py
 
       - name: Upload model info
@@ -38,7 +38,7 @@ jobs:
           path: model_info.txt
       - name: Debug MLflow creation
         run: ls -R
-        
+
       - name: Upload MLflow runs
         uses: actions/upload-artifact@v4
         with:
