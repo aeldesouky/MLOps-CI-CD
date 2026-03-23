@@ -12,6 +12,64 @@ learning_rate = 0.01
 batch_size = 64
 epochs = 5
 
+transform = transforms.Compose([
+    transforms.ToTensor()
+])
+
+train_dataset = datasets.MNIST(
+    root="./data",
+    train=True,
+    download=True,
+    transform=transform
+)
+
+test_dataset = datasets.MNIST(
+    root="./data",
+    train=False,
+    download=True,
+    transform=transform
+)
+
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=batch_size)
+
+class Net(nn.Module):
+
+    def __init__(self):
+        super(Net, self).__init__()
+
+        self.conv1 = nn.Conv2d(1, 32, 3)
+        self.conv2 = nn.Conv2d(32, 64, 3)
+
+        self.pool = nn.MaxPool2d(2)
+
+        self.fc1 = nn.Linear(64 * 12 * 12, 128)
+        self.fc2 = nn.Linear(128, 10)
+
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+
+        x = self.pool(x)
+
+        x = torch.flatten(x, 1)
+
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+
+        return x
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+model = Net().to(device)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
 with mlflow.start_run() as run:
     run_id = run.info.run_id
 
@@ -20,64 +78,6 @@ with mlflow.start_run() as run:
     mlflow.log_param("epochs", epochs)
 
     mlflow.set_tag("student_id", "202201114")
-
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-
-    train_dataset = datasets.MNIST(
-        root="./data",
-        train=True,
-        download=True,
-        transform=transform
-    )
-
-    test_dataset = datasets.MNIST(
-        root="./data",
-        train=False,
-        download=True,
-        transform=transform
-    )
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size)
-
-    class Net(nn.Module):
-
-        def __init__(self):
-            super(Net, self).__init__()
-
-            self.conv1 = nn.Conv2d(1, 32, 3)
-            self.conv2 = nn.Conv2d(32, 64, 3)
-
-            self.pool = nn.MaxPool2d(2)
-
-            self.fc1 = nn.Linear(64 * 12 * 12, 128)
-            self.fc2 = nn.Linear(128, 10)
-
-            self.relu = nn.ReLU()
-
-        def forward(self, x):
-
-            x = self.relu(self.conv1(x))
-            x = self.relu(self.conv2(x))
-
-            x = self.pool(x)
-
-            x = torch.flatten(x, 1)
-
-            x = self.relu(self.fc1(x))
-            x = self.fc2(x)
-
-            return x
-
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    model = Net().to(device)
-
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
 

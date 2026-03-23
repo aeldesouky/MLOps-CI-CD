@@ -36,12 +36,14 @@ jobs:
         with:
           name: model-info
           path: model_info.txt
-
+      - name: Debug MLflow creation
+        run: ls -R
+        
       - name: Upload MLflow runs
         uses: actions/upload-artifact@v4
         with:
             name: mlruns-data
-            path: mlruns
+            path: ./mlruns
 
   deploy:
       runs-on: ubuntu-latest
