@@ -25,7 +25,6 @@ jobs:
           pip install dvc mlflow
 
       - name: Pull data with DVC
-        run: dvc pull
 
       - name: Train model
         env:
