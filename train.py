@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 import mlflow
 import mlflow.pytorch
 
+mlflow.set_tracking_uri("file:./mlruns")
+
 learning_rate = 0.01
 batch_size = 64
 epochs = 5
