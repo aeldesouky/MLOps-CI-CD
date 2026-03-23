@@ -1,4 +1,4 @@
-name: ML Pipeline
+name: ML Multi-Stage Pipeline
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -21,9 +21,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mlflow torch torchvision dvc
+          pip install -r requirements.txt
+          pip install dvc mlflow
 
-      - name: Pull data
+      - name: Pull data with DVC
         run: dvc pull
 
       - name: Train model
@@ -38,11 +39,11 @@ jobs:
           path: model_info.txt
 
   deploy:
-    needs: validate
     runs-on: ubuntu-latest
+    needs: validate
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -63,6 +64,6 @@ jobs:
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         run: python check_threshold.py
 
-      - name: Mock Docker Build
+      - name: Mock Docker build
         run: |
           echo "Building Docker image for Run ID: $(cat model_info.txt)"

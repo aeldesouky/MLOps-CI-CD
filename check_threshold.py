@@ -7,15 +7,19 @@ with open("model_info.txt", "r") as f:
     run_id = f.read().strip()
 
 client = mlflow.tracking.MlflowClient()
-
 run = client.get_run(run_id)
 
-accuracy = run.data.metrics.get("accuracy", 0)
+accuracy = run.data.metrics.get("accuracy")
 
+print(f"Run ID: {run_id}")
 print(f"Accuracy: {accuracy}")
 
-if accuracy < THRESHOLD:
-    print("Model failed threshold check")
+if accuracy is None:
+    print("No accuracy found. Failing.")
     sys.exit(1)
-else:
-    print("Model passed threshold check")
+
+if accuracy < THRESHOLD:
+    print(f"Accuracy below threshold ({THRESHOLD}). Failing pipeline.")
+    sys.exit(1)
+
+print("Model passed threshold.")
