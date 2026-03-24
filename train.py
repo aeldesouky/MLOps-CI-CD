@@ -8,7 +8,7 @@ import mlflow.pytorch
 
 mlflow.set_experiment("Assignment5_Pipeline")
 
-learning_rate = 0.01
+learning_rate = 1
 batch_size = 64
 epochs = 5
 
@@ -43,8 +43,8 @@ class Net(nn.Module):
 
         self.pool = nn.MaxPool2d(2)
 
-        self.fc1 = nn.Linear(8 * 12 * 12, 128)
-        self.fc2 = nn.Linear(128, 10)
+        self.fc1 = nn.Linear(8 * 12 * 12, 2)
+        self.fc2 = nn.Linear(2, 10)
 
         self.relu = nn.ReLU()
 
