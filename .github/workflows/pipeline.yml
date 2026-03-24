@@ -54,40 +54,37 @@ jobs:
             ls -la
 
   deploy:
-        runs-on: ubuntu-latest
-        needs: validate
-    
-        steps:
+      runs-on: ubuntu-latest
+      needs: validate
+  
+      steps:
         - name: Checkout repository
           uses: actions/checkout@v4
-    
+  
         - name: Set up Python
           uses: actions/setup-python@v5
           with:
             python-version: '3.10'
-    
+  
         - name: Install dependencies
           run: pip install mlflow
-    
+  
         - name: Download model info
           uses: actions/download-artifact@v4
           with:
             name: model-info
-    
+            # Downloads model_info.txt to the root workspace
+  
         - name: Download MLflow runs
           uses: actions/download-artifact@v4
           with:
             name: mlruns-data
-            path: mlruns  # This creates the 'mlruns' directory and puts contents inside
-    
-        - name: Debug MLflow files
-          # Check the root of the downloaded folder
-          run: ls -R mlruns
-    
+            path: mlruns  # This creates a folder named 'mlruns' at the root
+  
         - name: Set MLflow tracking URI
-          # Point exactly to the 'mlruns' folder we just created
+          # Use the absolute path to the 'mlruns' folder we just created
           run: echo "MLFLOW_TRACKING_URI=file://${{ github.workspace }}/mlruns" >> $GITHUB_ENV
-    
+  
         - name: Check accuracy threshold
           run: python check_threshold.py
   
