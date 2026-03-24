@@ -30,6 +30,8 @@ jobs:
         # env:
         #   MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         run: python train.py
+        env:
+          MLFLOW_TRACKING_URI: file:./mlruns
 
       - name: Upload model info
         uses: actions/upload-artifact@v4
@@ -44,6 +46,12 @@ jobs:
         with:
             name: mlruns-data
             path: ./mlruns
+      - name: Debug after training
+        run: |
+            echo "Current directory:"
+            pwd
+            echo "Listing files:"
+            ls -la
 
   deploy:
       runs-on: ubuntu-latest
