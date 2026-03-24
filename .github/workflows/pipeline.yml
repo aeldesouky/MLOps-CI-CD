@@ -9,8 +9,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     env:
-      # Use a consistent relative path for both jobs
-      MLFLOW_TRACKING_URI: file:./mlruns
+      # Use a local SQLite file for all metadata
+      MLFLOW_TRACKING_URI: sqlite:///mlflow.db
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,38 +20,42 @@ jobs:
         run: pip install torch torchvision mlflow dvc
       - name: Train model
         run: python train.py
-      - name: Upload model info
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: model-info
-          path: model_info.txt
-      - name: Upload MLflow runs
-        uses: actions/upload-artifact@v4
-        with:
-          name: mlruns-data
-          path: mlruns  # This uploads the numeric experiment folders (0, 1, etc.)
+          name: ml-artifacts
+          # Upload the DB file, the run ID info, and the model files
+          path: |
+            mlflow.db
+            model_info.txt
+            mlruns/
+    #   - name: Upload model info
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: model-info
+    #       path: model_info.txt
+    #   - name: Upload MLflow runs
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: mlruns-data
+    #       path: mlruns  # This uploads the numeric experiment folders (0, 1, etc.)
 
   deploy:
     runs-on: ubuntu-latest
     needs: validate
     env:
-      MLFLOW_TRACKING_URI: file:./mlruns
+      MLFLOW_TRACKING_URI: sqlite:///mlflow.db
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - run: pip install mlflow
-      - name: Download model info
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: model-info
-      - name: Download MLflow runs
-        uses: actions/download-artifact@v4
-        with:
-          name: mlruns-data
-          # Download to 'mlruns' so the structure is ./mlruns/[experiment_id]/[run_id]
-          path: mlruns 
+          name: ml-artifacts
+          path: . # Extracts everything to the root
       - name: Check accuracy threshold
         run: python check_threshold.py
   
