@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import mlflow
 import mlflow.pytorch
 
-mlflow.set_tracking_uri("file:./mlruns")
+# mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("Assignment5_Pipeline")
 
 learning_rate = 0.01
