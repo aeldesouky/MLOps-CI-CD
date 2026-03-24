@@ -78,13 +78,13 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: mlruns-data
-            path: .
+            path: mlruns
   
         - name: Debug MLflow files
-          run: ls -R mlruns
+          run: ls -R mlruns/mlruns
   
         - name: Set MLflow tracking URI
-          run: echo "MLFLOW_TRACKING_URI=file:./mlruns" >> $GITHUB_ENV
+          run: echo "MLFLOW_TRACKING_URI=file:./mlruns/mlruns" >> $GITHUB_ENV
   
         - name: Check accuracy threshold
           run: python check_threshold.py
