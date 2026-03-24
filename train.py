@@ -43,8 +43,8 @@ class Net(nn.Module):
 
         self.pool = nn.MaxPool2d(2)
 
-        self.fc1 = nn.Linear(64 * 12 * 12, 128)
-        self.fc2 = nn.Linear(128, 10)
+        # self.fc1 = nn.Linear(64 * 12 * 12, 128)
+        # self.fc2 = nn.Linear(128, 10)
 
         self.relu = nn.ReLU()
 
