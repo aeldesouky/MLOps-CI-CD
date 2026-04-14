@@ -134,6 +134,6 @@ with mlflow.start_run() as run:
     print("Training complete")
 
     with open("model_info.txt", "w") as f:
-        f.write(mlflow.active_run().info.run_id)
+        f.write(mlflow.active_run().info.run_id
     # with open("model_info.txt", "w") as f:
     #     f.write(run_id)
